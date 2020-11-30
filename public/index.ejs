@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>sokcet teste</title>
+        <link rel="stylesheet" href="/style.css">
+    </head>
+    <body>
+        <form id="chat">
+            <input type="text" name="username" placeholder="type your bane">
+            <div class="messages" id="msg"></div>
+            <input type="text" name="message" placeholder="type your message">
+            <button type="submit" >Send</button>
+        </form>
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript">
+            let socket = io('http://localhost:3000');
+            let boxmessages = document.getElementById("msg");
+
+            function loadMessages(message){
+                let textInput = document.createElement('p');
+                textInput.textContent = `${message.name}: ${message.message}`;
+                boxmessages.append(textInput);
+
+                boxmessages.scrollTop = boxmessages.scrollHeight;
+            }
+
+            socket.on('previusMessages', (arrMessages) => {
+                for(let Messageobj in arrMessages){
+                    loadMessages(arrMessages[Messageobj]);
+                }
+            })
+
+            const sendMessage = document.getElementById('chat');
+            sendMessage.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const message = {
+                    name: e.target.username.value,
+                    message: e.target.message.value
+                };
+                socket.emit('message', message);
+                loadMessages(message);
+
+                e.target.message.value = '';
+            })
+
+            socket.on('typedmessages', (values) => {
+                loadMessages(values);
+            });
+
+        </script>
+    </body>
+</html>
